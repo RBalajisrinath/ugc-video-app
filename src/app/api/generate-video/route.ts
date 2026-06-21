@@ -16,10 +16,10 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
 const FONT_REGULAR = process.platform === "win32"
   ? "C\\:/Windows/Fonts/arial.ttf"
-  : "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+  : "/usr/share/fonts/DejaVu/DejaVuSans.ttf";
 const FONT_BOLD = process.platform === "win32"
   ? "C\\:/Windows/Fonts/arialbd.ttf"
-  : "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+  : "/usr/share/fonts/DejaVu/DejaVuSans-Bold.ttf";
 
 const TRENDING_AUDIO_BANK: Record<string, string[]> = {
   hype: [
@@ -747,7 +747,7 @@ async function composeVideo(
   const bgVideoPath = path.join(tempDir, "bg-video.mp4");
 
   await runCmd(
-    `${FFMPEG} -y -loop 1 -i "${bgImagePath}" -vf "scale=1200:2134:flags=lanczos,zoompan=z='min(zoom+0.0013,1.18)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=240:s=1080x1920:fps=30,eq=brightness=-0.1:contrast=1.08:saturation=1.08" -t 8 -c:v libx264 -pix_fmt yuv420p -an "${bgVideoPath}"`,
+    `${FFMPEG} -y -loop 1 -i "${bgImagePath}" -vf "scale=1200:2134:flags=lanczos,zoompan=z='min(zoom+0.0013,1.18)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=240:s=1080x1920:fps=30,eq=brightness=-0.1:contrast=1.08:saturation=1.08" -t 8 -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p -an "${bgVideoPath}"`,
     60000
   );
 
@@ -763,7 +763,7 @@ async function composeVideo(
     gifVideoPath = path.join(tempDir, "gif-video.mp4");
     try {
       await runCmd(
-        `${FFMPEG} -y -ignore_loop 0 -i "${gifPath}" -vf "fps=20,scale=390:-1:flags=lanczos" -t 8 -c:v libx264 -pix_fmt yuv420p -an "${gifVideoPath}"`,
+        `${FFMPEG} -y -ignore_loop 0 -i "${gifPath}" -vf "fps=20,scale=390:-1:flags=lanczos" -t 8 -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p -an "${gifVideoPath}"`,
         35000
       );
       if (!fs.existsSync(gifVideoPath) || fs.statSync(gifVideoPath).size < 1000) {
@@ -785,16 +785,16 @@ async function composeVideo(
 
   if (hasAudio && audioPath) {
     const cmd = hasGif
-      ? `${FFMPEG} -y -i "${bgVideoPath}" -i "${gifVideoPath}" -stream_loop -1 -i "${audioPath}" -filter_complex "${baseFilter}[v];[2:a]atrim=0:8,afade=t=in:st=0:d=0.35,afade=t=out:st=7.5:d=0.5,volume=0.2[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`
-      : `${FFMPEG} -y -i "${bgVideoPath}" -stream_loop -1 -i "${audioPath}" -filter_complex "${baseFilter}[v];[1:a]atrim=0:8,afade=t=in:st=0:d=0.35,afade=t=out:st=7.5:d=0.5,volume=0.2[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`;
+      ? `${FFMPEG} -y -i "${bgVideoPath}" -i "${gifVideoPath}" -stream_loop -1 -i "${audioPath}" -filter_complex "${baseFilter}[v];[2:a]atrim=0:8,afade=t=in:st=0:d=0.35,afade=t=out:st=7.5:d=0.5,volume=0.2[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -preset ultrafast -crf 28 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`
+      : `${FFMPEG} -y -i "${bgVideoPath}" -stream_loop -1 -i "${audioPath}" -filter_complex "${baseFilter}[v];[1:a]atrim=0:8,afade=t=in:st=0:d=0.35,afade=t=out:st=7.5:d=0.5,volume=0.2[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -preset ultrafast -crf 28 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`;
 
     await runCmd(cmd, 90000);
     return;
   }
 
   const cmdNoAudio = hasGif
-    ? `${FFMPEG} -y -i "${bgVideoPath}" -i "${gifVideoPath}" -f lavfi -i "sine=frequency=130:sample_rate=44100:duration=8" -filter_complex "${baseFilter}[v];[2:a]afade=t=in:st=0:d=0.25,afade=t=out:st=7.5:d=0.5,volume=0.07[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`
-    : `${FFMPEG} -y -i "${bgVideoPath}" -f lavfi -i "sine=frequency=130:sample_rate=44100:duration=8" -filter_complex "${baseFilter}[v];[1:a]afade=t=in:st=0:d=0.25,afade=t=out:st=7.5:d=0.5,volume=0.07[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`;
+    ? `${FFMPEG} -y -i "${bgVideoPath}" -i "${gifVideoPath}" -f lavfi -i "sine=frequency=130:sample_rate=44100:duration=8" -filter_complex "${baseFilter}[v];[2:a]afade=t=in:st=0:d=0.25,afade=t=out:st=7.5:d=0.5,volume=0.07[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -preset ultrafast -crf 28 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`
+    : `${FFMPEG} -y -i "${bgVideoPath}" -f lavfi -i "sine=frequency=130:sample_rate=44100:duration=8" -filter_complex "${baseFilter}[v];[1:a]afade=t=in:st=0:d=0.25,afade=t=out:st=7.5:d=0.5,volume=0.07[a]" -map "[v]" -map "[a]" -t 8 -c:v libx264 -preset ultrafast -crf 28 -c:a aac -shortest -pix_fmt yuv420p "${outputPath}"`;
 
   await runCmd(cmdNoAudio, 90000);
 }
