@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UGC Video Generator
 
-## Getting Started
+A Next.js app that takes a product URL and generates a real 8-second MP4 video with background footage, reaction GIFs, and animated text overlays.
 
-First, run the development server:
+## Quick Start
 
 ```bash
+cd ugc-video-app
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Open http://localhost:3000
+# Paste a product URL (e.g., https://calai.app)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it Works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Chat UI** - Paste any product URL
+2. **Auto-detect** - URL triggers video generation endpoint
+3. **Pipeline:**
+   - Scrape website content (Cheerio)
+   - Generate TikTok-native script via Claude (hook, overlay text, GIF search term, CTA)
+   - Download background image (Unsplash/Picsum, 25+ pool)
+   - Download reaction GIF (Tenor API)
+   - Assemble with ffmpeg: Ken Burns zoom + GIF overlay + animated text overlays
+4. **Output** - Unique 8s MP4 (9:16 vertical, ~1-2MB) served from `/public/videos`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+src/
+├── app/
+│   ├── page.tsx                    # Chat UI + video player
+│   ├── api/
+│   │   ├── chat/route.ts           # Natural chat (Claude)
+│   │   └── generate-video/route.ts # Video assembly (ffmpeg)
+│   └── components/
+│       └── UGCVideoPlayer.tsx      # Canvas video player (fallback)
+├── globals.css
+└── layout.tsx
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Copy `.env.example` to `.env.local`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+ANTHROPIC_API_KEY=sk-ant-...        # From https://console.anthropic.com
+TENOR_API_KEY=AIzaSy...             # From https://developers.google.com/tenor
+```
 
-## Deploy on Vercel
+## Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js 16 (App Router) + TypeScript + Tailwind
+- Anthropic Claude (script generation)
+- Tenor API (reaction GIFs)
+- Unsplash/Picsum (background images)
+- ffmpeg (video assembly)
+- Cheerio (web scraping)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Evaluation Criteria
+
+| Criterion | Implementation |
+|-----------|----------------|
+| End-to-end | Paste URL → MP4 in chat |
+| Creative output | TikTok-native hooks, varied GIFs, trending text animations |
+| Social trends | Reaction GIFs, vertical 9:16, timed text overlays |
+| Speed/robustness | ~15-30s, AI fallback scripts, error handling |
+| Technical quality | Modular architecture, ffmpeg assembly (not canvas), proper error handling |
+
+## Known Gaps
+
+- No audio layer (requires royalty-free music API)
+- Could add trend detection (hashtag scraping)
