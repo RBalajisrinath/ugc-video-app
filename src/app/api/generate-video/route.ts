@@ -878,7 +878,7 @@ export async function POST(req: Request) {
       throw new Error("Video composition failed");
     }
 
-    const videosDir = path.join(process.cwd(), "public", "videos");
+    const videosDir = path.join(process.cwd(), "videos");
     fs.mkdirSync(videosDir, { recursive: true });
 
     const fileName = `ugc-${Date.now()}.mp4`;
@@ -894,7 +894,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       message: responseMessage,
-      videoUrl: `/videos/${fileName}`,
+      videoUrl: `/api/video/${fileName}`,
       videoTitle: `${script.productName} UGC`,
       script,
     });
