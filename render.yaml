@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ugc-video-generator
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: TENOR_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
