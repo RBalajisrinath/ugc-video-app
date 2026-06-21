@@ -14,8 +14,12 @@ const runCmd = (cmd: string, timeout = 60000) =>
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
-const FONT_REGULAR = "C\\:/Windows/Fonts/arial.ttf";
-const FONT_BOLD = "C\\:/Windows/Fonts/arialbd.ttf";
+const FONT_REGULAR = process.platform === "win32"
+  ? "C\\:/Windows/Fonts/arial.ttf"
+  : "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+const FONT_BOLD = process.platform === "win32"
+  ? "C\\:/Windows/Fonts/arialbd.ttf"
+  : "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
 
 const TRENDING_AUDIO_BANK: Record<string, string[]> = {
   hype: [

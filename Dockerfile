@@ -1,7 +1,7 @@
 FROM node:20-alpine
 
-# Install ffmpeg
-RUN apk add --no-cache ffmpeg
+# Install ffmpeg and fonts for drawtext
+RUN apk add --no-cache ffmpeg fontconfig ttf-freefont ttf-dejavu
 
 WORKDIR /app
 
